@@ -1,0 +1,107 @@
+<%- include('partials/header') %>
+
+
+
+
+<%-include('partials/loadhead') %>
+<!-- loader handled via JS; no body tag here -->
+<div id="loader"></div>
+<div style="display:none;" id="myDiv" class="animate-bottom">
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-md-6 col-lg-4 mb-4">
+      <div class="card h-100 text-center">
+        <div class="card-body">
+          <h5 class="card-title">Random Row Predict</h5>
+          <p class="card-text">Use a single validation row to predict the attack type.</p>
+          <a href="/secrets" class="btn btn-primary">Predict</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4 mb-4">
+      <div class="card h-100 text-center">
+        <div class="card-body">
+          <h5 class="card-title">Open CSV</h5>
+          <p class="card-text">Upload a CSV file (1..500..n rows) and append predictions per row.</p>
+          <form id="uploadForm" enctype="multipart/form-data" action="/uploadjavatpoint" method="post"> 
+            <div class="form-group text-left">
+              <label for="selected_model">Algorithm</label>
+              <select id="selected_model" class="form-control" name="selected_model">
+                <option value="" disabled="disabled" selected="selected">Select Algorithm</option>
+                <option value="knn">KNN - 97%</option>
+                <option value="rf">Random Forest - 97%</option>
+                <option value="cnn">CNN - 95%</option>
+                <option value="lstm">LSTM - 95%</option>
+              </select>
+            </div>
+            <div class="form-group text-left">
+              <label for="f1">CSV or TXT file</label>
+              <input class="form-control" type="file" id="f1" name="myfile" accept=".csv,.txt" onclick="myfunction_1()">
+            </div>
+            <div class="d-flex justify-content-between align-items-center">
+              <button type="submit" id="bt-1" class="btn btn-primary" name="submit" onclick="myfunction_2()" disabled>Predict</button>
+              <span id="status" class="text-muted small"></span>
+            </div>
+          </form>
+          <form class="mt-3" action="/download-file">
+            <button class="btn btn-outline-light" id="bt-2" type="submit" disabled>Download File</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6 col-lg-4 mb-4">
+      <div class="card h-100 text-center">
+        <div class="card-body">
+          <h5 class="card-title">Enter Network Parameters</h5>
+          <p class="card-text">Input parameters to predict attack type using the selected model.</p>
+          <a href="/parameters" class="btn btn-primary">Predict</a>
+        </div>
+      </div>
+    </div>
+  </div>
+<script>
+  let timeout;
+  function myfunction_1(){
+    document.getElementById("bt-1").disabled=false;
+  }
+  function myfunction_2(){
+    timeout=setTimeout(myfunction_3,10000);
+  }
+  function myfunction_3(){
+    document.getElementById("bt-2").disabled=false;
+  }
+</script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/3.51/jquery.form.min.js"></script>
+<script>
+  $(function() {
+    $('#uploadForm').on('submit', function() {
+      $('#status').empty().text('File is uploading...');
+      $(this).ajaxSubmit({
+        error: function(xhr) {
+          $('#status').empty().text('Error: ' + xhr.status);
+        },
+        success: function(response) {
+          console.log(response);
+          $('#status').empty().text(response);
+        }
+      });
+      return false;
+    });
+  });
+</script>
+
+<%- include('partials/footer') %>
+</div>
+
+<script>
+var myVar;
+
+function myFunction() {
+  myVar = setTimeout(showPage, 200);
+}
+window.addEventListener('load', myFunction);
+<%-include('partials/loadfoot') %>

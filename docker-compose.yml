@@ -1,0 +1,29 @@
+services:
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DB_LINK=${DB_LINK:-mongodb://mongo:27017/nids}
+      - CLIENT_ID=${CLIENT_ID:-}
+      - CLIENT_SECRET=${CLIENT_SECRET:-}
+      - CALL_BACK_URL=${CALL_BACK_URL:-http://localhost:3000/auth/google/NIDS}
+      - URL=${URL:-https://www.googleapis.com/oauth2/v2/userinfo}
+    depends_on:
+      - mongo
+    volumes:
+      - ./Uploaded_files:/app/Uploaded_files
+    restart: unless-stopped
+
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
+volumes:
+  mongo_data:
+
