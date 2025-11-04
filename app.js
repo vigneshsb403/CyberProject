@@ -273,12 +273,6 @@ path+=submitted_csv_file;
 app.get("/features",function(req,res){
   res.render("features");
 })
-app.get("/attacks",function(req,res){
-  res.render("attacks");
-})
-app.get("/about",function(req,res){
-  res.render("about");
-})
 app.get("/knn_bin_table",function(req,res){
   res.render("knn_bin_table");
 });
