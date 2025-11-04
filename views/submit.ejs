@@ -63,12 +63,53 @@
   </div>
 <script>
   let timeout;
+  let statusCheckInterval;
   function myfunction_1(){
     document.getElementById("bt-1").disabled=false;
   }
   function myfunction_2(){
-    timeout=setTimeout(myfunction_3,10000);
+    // Disable predict button while processing
+    document.getElementById("bt-1").disabled=true;
+    // Start checking processing status
+    checkProcessingStatus();
   }
+  
+  function checkProcessingStatus() {
+    // Clear any existing interval
+    if (statusCheckInterval) {
+      clearInterval(statusCheckInterval);
+    }
+    
+    // Poll for status every 2 seconds
+    statusCheckInterval = setInterval(function() {
+      $.ajax({
+        url: '/processing-status',
+        method: 'GET',
+        success: function(data) {
+          console.log('Status:', data);
+          if (data.completed) {
+            // Processing completed
+            clearInterval(statusCheckInterval);
+            $('#status').empty().text('Processing completed! File is ready for download.');
+            $('#bt-2').prop('disabled', false);
+            $('#bt-1').prop('disabled', false);
+          } else if (data.status === 'error') {
+            // Error occurred
+            clearInterval(statusCheckInterval);
+            $('#status').empty().text('Error processing file. Please try again.');
+            $('#bt-1').prop('disabled', false);
+          } else if (data.status === 'processing') {
+            // Still processing
+            $('#status').empty().text('Processing your file... Please wait.');
+          }
+        },
+        error: function(xhr) {
+          console.error('Error checking status:', xhr);
+        }
+      });
+    }, 2000); // Check every 2 seconds
+  }
+  
   function myfunction_3(){
     document.getElementById("bt-2").disabled=false;
   }
@@ -79,14 +120,22 @@
 <script>
   $(function() {
     $('#uploadForm').on('submit', function() {
+      // Reset status and disable download button
       $('#status').empty().text('File is uploading...');
+      $('#bt-2').prop('disabled', true);
+      // Clear any existing status check interval
+      if (statusCheckInterval) {
+        clearInterval(statusCheckInterval);
+      }
       $(this).ajaxSubmit({
         error: function(xhr) {
           $('#status').empty().text('Error: ' + xhr.status);
+          $('#bt-1').prop('disabled', false);
         },
         success: function(response) {
           console.log(response);
           $('#status').empty().text(response);
+          // Status checking will be handled by myfunction_2() which is called onclick
         }
       });
       return false;

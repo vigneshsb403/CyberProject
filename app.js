@@ -228,31 +228,54 @@ app.get('/csv',function(req,res){  
   });
 
 final_ans=""
-app.post('/uploadjavatpoint',function(req,res){  
-      upload(req,res,function(err) {  
-          if(err) {  
-              return res.end("Error uploading file.")
-          }  
-          res.end("File is uploaded successfully!"); 
+processing_status="idle" // Track processing status: idle, processing, completed, error
+app.post('/uploadjavatpoint',function(req,res){  
+    upload(req,res,function(err) {  
+        if(err) {  
+            processing_status="error";
+            return res.end("Error uploading file.")
+        }  
+        res.end("File is uploaded successfully! Processing started..."); 
   console.log("hello");
   const submitted_model=req.body.selected_model;
   console.log(submitted_model);
   console.log(submitted_csv_file);
 
+  // Set status to processing
+  processing_status="processing";
+  final_ans="";
+
   let options={
     args:[submitted_model,submitted_csv_file]
   };
   PythonShell.run('nids_csv_updated.py',options, (err,response)=>{
-    if (err)
-    console.log(err);
-    if(response){
-      temp_final_ans=stringify(response[0]);
-      final_ans=temp_final_ans.slice(2,-2);
-      console.log("completed");
+    if (err) {
+      console.log(err);
+      processing_status="error";
+      final_ans="error";
+    } else {
+      // Script completed successfully - processing is done
+      processing_status="completed";
+      if(response && response.length > 0){
+        temp_final_ans=stringify(response[0]);
+        final_ans=temp_final_ans.slice(2,-2);
+      } else {
+        final_ans="completed!!";
       }
-  }) 
+      console.log("Processing completed successfully");
+    }
+  }) 
 })
 });
+
+// Endpoint to check processing status
+app.get('/processing-status',(req,res)=>{
+  res.json({
+    status: processing_status,
+    completed: (processing_status === "completed")
+  });
+});
+
 l="completed!!"
 app.get('/index',(req,res)=>{
   if(l==final_ans){
