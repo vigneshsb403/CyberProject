@@ -1,19 +1,15 @@
-# Use Node.js 18 as base image
-FROM node:18
+# Use Python 3.9 as base image and install Node.js 18
+FROM python:3.9-slim
 
-# Install Python 3.9 and pip, and other dependencies
+# Install Node.js 18 and build dependencies for scikit-learn
 RUN apt-get update && apt-get install -y \
-    python3.9 \
-    python3.9-dev \
-    python3.9-distutils \
+    curl \
+    build-essential \
+    gcc \
+    g++ \
+    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
-
-# Install pip for Python 3.9
-RUN curl -sS https://bootstrap.pypa.io/get-pip.py | python3.9
-
-# Set Python 3.9 as default python3
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
-RUN update-alternatives --install /usr/bin/pip3 pip3 /usr/bin/pip3.9 1
 
 # Set working directory
 WORKDIR /app
@@ -26,7 +22,7 @@ RUN npm install
 
 # Copy requirements.txt and install Python dependencies
 COPY requirements.txt ./
-RUN python3.9 -m pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy all application files
 COPY . .
